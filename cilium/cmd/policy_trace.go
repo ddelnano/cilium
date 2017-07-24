@@ -95,20 +95,10 @@ dports can be can be for example: 80/tcp, 53 or 23/udp.`,
 
 		// Parse endpoint IDs.
 		if srcEndpoint != "" {
-			/*srcEndpointLabels, err := getLabelsFromEndpoint(srcEndpoint)
-			if err != nil {
-				Fatalf("Invalid source endpoint")
-			}
-			srcSlice = append(srcSlice, srcEndpointLabels...)*/
 			srcSlice = appendEpLabelsToSlice(srcEndpoint, srcSlice)
 		}
 
 		if dstEndpoint != "" {
-			//dstEndpointLabels, err := getLabelsFromEndpoint(dstEndpoint)
-			/*if err != nil {
-				Fatalf("Invalid destination endpoint %s", dstEndpoint)
-			}
-			dstSlice = append(dstSlice, dstEndpointLabels...)*/
 			dstSlice = appendEpLabelsToSlice(dstEndpoint, dstSlice)
 		}
 
@@ -118,12 +108,6 @@ dports can be can be for example: 80/tcp, 53 or 23/udp.`,
 			if err != nil {
 				Fatalf("Cannot parse pod name \"%s\": %s", fmtdPodName, err)
 			}
-			/*ep, err := client.EndpointGet(fmtdPodName)
-			if err != nil {
-				Fatalf("Cannot get endpoint corresponding to pod name %s: %s\n", fmtdPodName, err)
-			}
-
-			srcSlice = append(srcSlice, ep.Identity.Labels...)*/
 
 			srcSlice = appendEpLabelsToSlice(fmtdPodName, srcSlice)
 		}
@@ -134,12 +118,6 @@ dports can be can be for example: 80/tcp, 53 or 23/udp.`,
 			if err != nil {
 				Fatalf("Cannot parse pod name \"%s\": %s", fmtdPodName, err)
 			}
-			/*ep, err := client.EndpointGet(fmtdPodName)
-			if err != nil {
-				Fatalf("Cannot get endpoint corresponding to pod name %s: %s\n", fmtdPodName, err)
-			}
-
-			dstSlice = append(dstSlice, ep.Identity.Labels...)*/
 
 			dstSlice = appendEpLabelsToSlice(fmtdPodName, dstSlice)
 		}
