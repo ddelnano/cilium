@@ -24,6 +24,8 @@ import (
 
 	"github.com/cilium/cilium/pkg/endpoint"
 	"github.com/spf13/cobra"
+	"github.com/cilium/cilium/pkg/k8s"
+	meta_v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 const (
@@ -180,6 +182,48 @@ func parseLabels(slice []string) ([]string, error) {
 	}
 
 	return slice, nil
+}
+
+func getSecIdFromK8s(podName string) (string, error) {
+	fmtdPodName := endpoint.NewID(endpoint.PodNamePrefix, podName)
+	_, _, err := endpoint.ValidateID(fmtdPodName)
+	if err != nil {
+		Fatalf("Cannot parse pod name \"%s\": %s", fmtdPodName, err)
+	}
+
+	splitPodName := strings.Split(podName, ":")
+	if len(splitPodName) < 2 {
+		Fatalf("Improper identifier of pod provided; should be <namespace>:<pod name>")
+	}
+	namespace := splitPodName[0]
+	pod := splitPodName[1]
+
+	resp, err := client.ConfigGet()
+	if err != nil {
+		Fatalf("Error while retrieving configuration: %s", err)
+	}
+	k8sEndpoint := resp.K8sEndpoint
+	k8sConfig := resp.K8sConfiguration
+	restConfig, err := k8s.CreateConfig(k8sEndpoint, k8sConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create rest configuration: %s", err)
+	}
+	k8sClient, err := k8s.CreateClient(restConfig)
+	if err != nil {
+		return nil, fmt.Errorf("unable to create k8s client: %s", err)
+	}
+
+	p, err := k8sClient.CoreV1().Pods(namespace).Get(pod, meta_v1.GetOptions{})
+	if err != nil {
+		return nil, fmt.Errorf("unable to get pod %s in namespace %s", namespace, pod)
+	}
+
+	secId := p.GetAnnotations()["cilium-identity"]
+	if secId == "" {
+		return nil, fmt.Errorf("cilium-identity annotation not set for pod %s in namespace %s", namespace, pod)
+	}
+	
+	return secId, nil
 }
 
 // parseL4PortsSlice parses a given `slice` of strings. Each string should be in
