@@ -206,21 +206,21 @@ func getSecIdFromK8s(podName string) (string, error) {
 	k8sConfig := resp.K8sConfiguration
 	restConfig, err := k8s.CreateConfig(k8sEndpoint, k8sConfig)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create rest configuration: %s", err)
+		return "", fmt.Errorf("unable to create rest configuration: %s", err)
 	}
 	k8sClient, err := k8s.CreateClient(restConfig)
 	if err != nil {
-		return nil, fmt.Errorf("unable to create k8s client: %s", err)
+		return "", fmt.Errorf("unable to create k8s client: %s", err)
 	}
 
 	p, err := k8sClient.CoreV1().Pods(namespace).Get(pod, meta_v1.GetOptions{})
 	if err != nil {
-		return nil, fmt.Errorf("unable to get pod %s in namespace %s", namespace, pod)
+		return "", fmt.Errorf("unable to get pod %s in namespace %s", namespace, pod)
 	}
 
 	secId := p.GetAnnotations()["cilium-identity"]
 	if secId == "" {
-		return nil, fmt.Errorf("cilium-identity annotation not set for pod %s in namespace %s", namespace, pod)
+		return "", fmt.Errorf("cilium-identity annotation not set for pod %s in namespace %s", namespace, pod)
 	}
 	
 	return secId, nil
