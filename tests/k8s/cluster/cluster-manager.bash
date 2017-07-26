@@ -29,6 +29,7 @@ cluster_name="cilium-k8s-tests"
 node_cidr_mask_size="112"
 service_cluster_ip_range="FD03::/112"
 disable_ipv4=true
+k8s_version=${k8s_version}
 EOF
     else
         cat <<'EOF' > "${dir}/env.bash"
@@ -43,6 +44,7 @@ cluster_name="cilium-k8s-tests"
 node_cidr_mask_size="16"
 service_cluster_ip_range="172.20.0.0/16"
 disable_ipv4=false
+k8s_version=${k8s_version}
 EOF
     fi
 
