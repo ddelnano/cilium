@@ -94,6 +94,12 @@ kubectl exec ${CILIUM_POD_1} -n ${NAMESPACE} -- cilium policy get
 echo "---- Policy in ${CILIUM_POD_2} ----"
 kubectl exec ${CILIUM_POD_2} -n ${NAMESPACE} -- cilium policy get
 
+echo "---- Policy in ${CILIUM_POD_1} ----"
+kubectl exec ${CILIUM_POD_1} -n ${NAMESPACE} -- cilium policy get
+
+echo "---- Policy in ${CILIUM_POD_2} ----"
+kubectl exec ${CILIUM_POD_2} -n ${NAMESPACE} -- cilium policy get
+
 echo "----- testing L3/L4 policy -----"
 APP2_POD=$(kubectl get pods -l id=app2 -o jsonpath='{.items[0].metadata.name}')
 SVC_IP=$(kubectl get svc app1-service -o jsonpath='{.spec.clusterIP}' )
