@@ -259,12 +259,15 @@ function gather_files {
     TEST_SUITE=$2
     CILIUM_ROOT="src/github.com/cilium/cilium"
     if [ -z "${TEST_SUITE}" ]; then 
-        TEST_SUITE="runtime-tests"
+      TEST_SUITE="runtime-tests"
+    fi
+    if [ -z "${GOPATH}" ]; then 
+      local GOPATH="/home/vagrant/go"
     fi 
     if [[ "${TEST_SUITE}" == "runtime-tests" ]]; then
       CILIUM_DIR="${GOPATH}/${CILIUM_ROOT}/tests/cilium-files/${TEST_NAME}"
     elif [[ "${TEST_SUITE}" == "k8s-tests" ]]; then 
-      CILIUM_DIR="${GOPATH}/${CILIUM_ROOT}/tests/k8s/cilium-files/${TEST_NAME}"
+      CILIUM_DIR="${GOPATH}/${CILIUM_ROOT}/tests/k8s/tests/cilium-files/${TEST_NAME}"
     else
       echo "${TEST_SUITE} not a valid value, continuing"
       CILIUM_DIR="${GOPATH}/${CILIUM_ROOT}/tests/cilium-files/${TEST_NAME}"
@@ -411,7 +414,7 @@ function copy_files_vm {
   vagrant ssh $VM_NAME -c 'sudo -E bash -c "journalctl --no-pager -u cilium > /home/vagrant/go/src/github.com/cilium/cilium/tests/cilium-files/cilium-logs && chmod a+r /home/vagrant/go/src/github.com/cilium/cilium/tests/cilium-files/cilium-logs"'
   vagrant ssh $VM_NAME -c 'ls -altr /home/vagrant/go/src/github.com/cilium/cilium/tests/cilium-files'
 
-  scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r -P ${PORT} -i ${ID_FILE} vagrant@127.0.0.1:/home/vagrant/go/src/github.com/cilium/cilium/${FILES_DIR} ./cilium-files-${VM_NAME}
+  scp -o StrictHostKeyChecking=no -o UserKnownHostsFile=/dev/null -r -P ${PORT} -i ${ID_FILE} vagrant@127.0.0.1:/home/vagrant/go/src/github.com/cilium/cilium/${FILES_DIR} ${WORKSPACE}/cilium-files-${VM_NAME}
 }
 
 function get_k8s_vm_name {
