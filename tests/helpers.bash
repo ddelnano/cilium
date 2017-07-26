@@ -81,7 +81,7 @@ function wait_for_k8s_endpoints {
 
 	# Wait some time for at least one endpoint to get into regenerating state
 	# FIXME: Remove when this is reliable
-	sleep 5
+	sleep 20
 
 	local sleep_time=1
 	local iter=0
@@ -149,7 +149,7 @@ function wait_for_policy_enforcement {
 function wait_all_k8s_regenerated {
     # Wait some time for at least one endpoint to get into regenerating state
     # FIXME: Remove when this is reliable
-    sleep 5
+    sleep 20
 
     local cilium_k8s_npods=$(kubectl get pods -n kube-system -o wide | grep cilium | wc -l)
     set +x
