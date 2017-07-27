@@ -24,9 +24,10 @@ import (
 
 // Supported key-value store types.
 const (
-	Local  = "local"
-	Consul = "consul"
-	Etcd   = "etcd"
+	Local     = "local"
+	Consul    = "consul"
+	Etcd      = "etcd"
+	Zookeeper = "zookeeper"
 )
 
 type KVClient interface {

@@ -51,6 +51,15 @@ func initClient() error {
 		log.Infof("Using etcd as key-value store")
 		Client = c
 
+	case Zookeeper:
+		c, err := newZkClient()
+
+		if err != nil {
+			return err
+		}
+
+		log.Infof("Using zookeeper as key-value store")
+		Client = c
 	case Local:
 		log.Infof("Using local storage as key-value store")
 		Client = NewLocalClient()

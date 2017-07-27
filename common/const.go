@@ -17,8 +17,11 @@ package common
 const (
 	// Consul dedicated constants
 
+	// TODO: Probably don't want to update this for everything but zookeeper needs
+	// it to begin with a leading '/'
+
 	// OperationalPath is the base path to store the operational details in consul.
-	OperationalPath = "cilium-net/operational"
+	OperationalPath = "/cilium-net/operational"
 
 	// LastFreeLabelIDKeyPath is the path where the Last free UUID is stored in consul.
 	LastFreeLabelIDKeyPath = OperationalPath + "/Labels/LastUUID"

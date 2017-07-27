@@ -60,6 +60,26 @@ tests-consul:
 	@rmdir ./daemon/1 ./daemon/1_backup 2> /dev/null || true
 	docker rm -f "cilium-consul-test-container"
 
+tests-zookeeper:
+	@docker rm -f "cilium-zookeeper-test-container" 2> /dev/null || true
+	-docker run -d \
+           --name "cilium-zookeeper-test-container" \
+	   -p 2181:2181 \
+           zookeeper:3.4
+	echo "mode: count" > coverage-all.out
+	echo "mode: count" > coverage.out
+
+	$(foreach pkg,$(GOFILES),\
+	go test \
+            -ldflags "-X "github.com/cilium/cilium/pkg/kvstore".backend=zookeeper" \
+            -timeout 30s -coverprofile=coverage.out -covermode=count $(pkg) || exit 1;\
+            tail -n +2 coverage.out >> coverage-all.out;)
+	go tool cover -html=coverage-all.out -o=coverage-all.html
+	rm coverage-all.out
+	rm coverage.out
+	@rmdir ./daemon/1 ./daemon/1_backup 2> /dev/null || true
+	docker rm -f "cilium-zookeeper-test-container"
+
 clean-container:
 	for i in $(SUBDIRS); do $(MAKE) -C $$i clean; done
 	for i in $(SUBDIRSLIB); do $(MAKE) -C $$i clean; done

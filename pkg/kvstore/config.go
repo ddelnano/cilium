@@ -30,6 +30,7 @@ var (
 	consulConfig *consulAPI.Config // Consul configuration
 	etcdConfig   *etcdAPI.Config   // Etcd Configuration
 	etcdCfgPath  string            // Etcd Configuration path
+	zkConfig     ZkConfig
 )
 
 // validateOpts iterates through all of the keys in kvStoreOpts, and errors out
@@ -53,6 +54,11 @@ func SetupDummy() error {
 	case Etcd:
 		etcdConfig = &etcdAPI.Config{}
 		etcdConfig.Endpoints = []string{"http://127.0.0.1:4002"}
+
+	case Zookeeper:
+		zkConfig = ZkConfig{
+			Endpoints: []string{"127.0.0.1:2181"},
+		}
 
 	default:
 		return fmt.Errorf("Unknown kvstore backend: %s", backend)
@@ -100,6 +106,19 @@ func Setup(selectedBackend string, opts map[string]string) error {
 			consulConfig = consulDefaultAPI
 		} else {
 			return fmt.Errorf("invalid configuration for consul provided; please specify the address to a consul instance with --kvstore-opt %s=<consul address> option", cAddr)
+		}
+
+	case Zookeeper:
+		err := validateOpts(backend, opts, ZkOpts)
+
+		if err != nil {
+			return fmt.Errorf("invalid configuration for zookeeper provided; please specify the address to a zookeeper instance with --kvstore-opt %s=<zookeeper address> option", zAddr)
+		}
+
+		endpoint := opts[zAddr]
+
+		zkConfig = ZkConfig{
+			Endpoints: []string{endpoint},
 		}
 
 	case Local:
