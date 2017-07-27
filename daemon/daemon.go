@@ -374,17 +374,34 @@ func (d *Daemon) installMasqRule() error {
 		return err
 	}
 
-	// Masquerade all traffic from node prefix not going to node prefix
-	// which is not going over the tunnel device
-	if err := runProg("iptables", []string{
-		"-t", "nat",
-		"-A", "CILIUM_POST",
-		"-s", nodeaddress.GetIPv4AllocRange().String(),
-		"!", "-d", nodeaddress.GetIPv4AllocRange().String(),
-		"!", "-o", "cilium_" + tunnelMode,
-		"-m", "comment", "--comment", "cilium masquerade non-cluster",
-		"-j", "MASQUERADE"}, false); err != nil {
-		return err
+	if tunnelMode == tunnelModeDisabled {
+		// When tunneling is disabled, masquerade all traffic that:
+		//  - with a source from a local endpoint
+		//  - with a destination outside of the cluster prefix
+		if err := runProg("iptables", []string{
+			"-t", "nat",
+			"-A", "CILIUM_POST",
+			"-s", nodeaddress.GetIPv4AllocRange().String(),
+			"!", "-d", nodeaddress.GetIPv4ClusterRange().String(),
+			"-m", "comment", "--comment", "cilium endpoint->world masquerade",
+			"-j", "MASQUERADE"}, false); err != nil {
+			return err
+		}
+	} else {
+		// When tunneling is enabled, masquerade all traffic that:
+		//  - with a source from a local endpoint
+		//  - with a destination outside of the local node prefix
+		//  - going to an interface other than the tunnel interface
+		if err := runProg("iptables", []string{
+			"-t", "nat",
+			"-A", "CILIUM_POST",
+			"-s", nodeaddress.GetIPv4AllocRange().String(),
+			"!", "-d", nodeaddress.GetIPv4AllocRange().String(),
+			"!", "-o", "cilium_" + tunnelMode,
+			"-m", "comment", "--comment", "cilium endpoint->world masquerade",
+			"-j", "MASQUERADE"}, false); err != nil {
+			return err
+		}
 	}
 
 	// Masquerade all traffic from the host into the cilium_host interface
@@ -468,7 +485,7 @@ func (d *Daemon) compileBase() error {
 
 	// Always remove masquerade rule and then re-add it if required
 	d.removeMasqRule()
-	if masquerade && device == deviceDisabled {
+	if masquerade {
 		if err := d.installMasqRule(); err != nil {
 			return err
 		}
