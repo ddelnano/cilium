@@ -48,7 +48,9 @@
 #define CILIUM_CALL_IPV4			7
 #define CILIUM_CALL_NAT64			8
 #define CILIUM_CALL_NAT46			9
-#define CILIUM_CALL_SIZE			10
+#define CILIUM_CALL_LB_IP4			10
+#define CILIUM_CALL_LB_IP6			11
+#define CILIUM_CALL_SIZE			12
 
 typedef __u64 mac_t;
 
